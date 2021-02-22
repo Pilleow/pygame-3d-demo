@@ -15,7 +15,7 @@ class Engine:
         '''
         update and draw 3D objects
         '''
-        self.box_list.sort(key=lambda x: abs(x.dim_factors[0]), reverse=True)
+        self.box_list.sort(key=lambda x: abs(x.dim_factors[0]) + abs(x.dim_factors[1]), reverse=True)
         for box in self.box_list:
             box.set_dim_factors(
                 scroll, self.res
@@ -63,31 +63,34 @@ class Box:
         ]
         # calculate translation
         transl = [self.width * self.dim_factors[0], self.width * self.dim_factors[1]]
-        self.front_points = [
-            [back_points[0][0] + transl[0], back_points[0][1] + transl[1]], # top left
-            [back_points[1][0] + transl[0], back_points[1][1] + transl[1]], # top right
-            [back_points[2][0] + transl[0], back_points[2][1] + transl[1]], # bottom right
-            [back_points[3][0] + transl[0], back_points[3][1] + transl[1]] # bottom left
-        ]
+        self.front_points = []
+        for i in range(4):
+            self.front_points.append([back_points[i][0] + transl[0], back_points[i][1] + transl[1]])
+
         # draw side rects (polygons)
         if top:
             pygame.draw.polygon(display, self.side_color, (
-                back_points[0], self.front_points[0], self.front_points[1], back_points[1]
+                back_points[0], self.front_points[0], 
+                self.front_points[1], back_points[1]
             ))
         else:
-            pygame.draw.polygon(display, [n-14 for n in self.side_color], (
-                back_points[2], self.front_points[2], self.front_points[3], back_points[3]
+            pygame.draw.polygon(display, [abs(n-11) for n in self.side_color], (
+                back_points[2], self.front_points[2], 
+                self.front_points[3], back_points[3]
             ))
         if left:
-            pygame.draw.polygon(display, [n-7 for n in self.side_color], (
-                back_points[1], self.front_points[1], self.front_points[2], back_points[2]
+            pygame.draw.polygon(display, [abs(n-6) for n in self.side_color], (
+                back_points[1], self.front_points[1], 
+                self.front_points[2], back_points[2]
             ))
         else:
-            pygame.draw.polygon(display, [n-7 for n in self.side_color], (
-                back_points[3], self.front_points[3], self.front_points[0], back_points[0]
+            pygame.draw.polygon(display, [abs(n-6) for n in self.side_color], (
+                back_points[3], self.front_points[3], 
+                self.front_points[0], back_points[0]
             ))
         # draw front rect
         pygame.draw.rect(
             display, self.front_color, 
-            [self.front_points[0][0], self.front_points[0][1], self.back_rect[2], self.back_rect[3]]
+            [self.front_points[0][0], self.front_points[0][1], 
+            self.back_rect[2], self.back_rect[3]]
         )

@@ -1,25 +1,35 @@
 import pygame
+import random
 import engine as e
+
+from perlin_noise import PerlinNoise
 
 pygame.init()
 
-RES = [1920, 1080]
+RES = [1280, 720]
 engine = e.Engine(RES)
 clock = pygame.time.Clock()
 display = pygame.display.set_mode(RES)
 
+time = 0
 scroll = [0, 0]
+colors = [[54, 52, 51], [219, 49, 22]]
+noise = PerlinNoise(3)
 
-# hardcoded boxes because yes
-engine.add_box(e.Box([50, 70, 90, 120], 40, [50, 70, 90], [80, 100, 120]))
-engine.add_box(e.Box([600, 240, 70, 50], 100, [69, 245, 66], [99, 255, 96]))
-engine.add_box(e.Box([140, 90, 150, 70], 75, [245, 239, 66], [255, 255, 96]))
-engine.add_box(e.Box([806, 600, 100, 60], 90, [245, 69, 66], [255, 99, 96]))
-engine.add_box(e.Box([1010, 50, 150, 70], 60, [150, 66, 245], [180, 96, 255]))
-engine.add_box(e.Box([RES[0]//2-25, RES[1]//2-25, 50, 50], 20, [66, 245, 173], [96, 255, 203]))
+# box generation
+for y in range(5):
+    for x in range(7):
+        color = random.choice(colors)
+        side_color = [x-12 for x in color]
+        engine.add_box(e.Box(
+                pygame.Rect(x*150, y*100, 125, 75), 
+                random.choice(range(10, 50, 4)), 
+                color,
+                side_color
+        ))
 
 def render(surface):
-    surface.fill((10, 10, 10))
+    surface.fill((10, 8, 9))
     engine.run_cycle(surface, scroll)
     pygame.display.update()
 
@@ -27,7 +37,6 @@ def render(surface):
 run = True
 while run:
     clock.tick(9000)
-    print(clock.get_fps())
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -48,6 +57,13 @@ while run:
         scroll[0] += velocity
     if keys[pygame.K_LEFT]:
         scroll[0] -= velocity
+
+    for i, box in enumerate(engine.box_list):
+        value = noise([(time + 2*i)/221, i/221]) * 5
+        if 0 >= box.width + value or 70 <= box.width + value:
+            value = 0
+        box.width += value
+    time += 1
 
     render(display)
 
