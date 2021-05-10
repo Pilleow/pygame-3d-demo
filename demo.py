@@ -1,8 +1,7 @@
 import pygame
 import random
+import math
 import engine as e
-
-from perlin_noise import PerlinNoise
 
 pygame.init()
 
@@ -14,15 +13,14 @@ display = pygame.display.set_mode(RES)
 time = 0
 scroll = [0, 0]
 colors = [[54, 52, 51], [219, 49, 22]]
-noise = PerlinNoise(3)
 
 # box generation
-for y in range(5):
-    for x in range(7):
+for y in range(10):
+    for x in range(25):
         color = random.choice(colors)
         side_color = [x-12 for x in color]
         engine.add_box(e.Box(
-                pygame.Rect(x*150, y*100, 125, 75), 
+                pygame.Rect(x*20, y*15, 15, 10), 
                 random.choice(range(10, 50, 4)), 
                 color,
                 side_color
@@ -36,8 +34,6 @@ def render(surface):
 ''' --- MAINLOOP --- '''
 run = True
 while run:
-    clock.tick(9000)
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -59,8 +55,8 @@ while run:
         scroll[0] -= velocity
 
     for i, box in enumerate(engine.box_list):
-        value = noise([(time + 2*i)/221, i/221]) * 5
-        if 0 >= box.width + value or 70 <= box.width + value:
+        value = math.sin(pygame.time.get_ticks()/1000 + i)
+        if 10 >= box.width + value or 70 <= box.width + value:
             value = 0
         box.width += value
     time += 1
